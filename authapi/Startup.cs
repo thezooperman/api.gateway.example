@@ -34,7 +34,8 @@ namespace authapi
             {
                 var repoDependency = provider.GetRequiredService<IRepository>();
                 var memDependency = provider.GetRequiredService<IMemCache>();
-                return new JwtAuthenticator(repoDependency, memDependency, token);
+                var loggerDependency = provider.GetRequiredService<Microsoft.Extensions.Logging.ILogger<JwtAuthenticator>>();
+                return new JwtAuthenticator(loggerDependency, repoDependency, memDependency, token);
             });
             services.AddSingleton<IMemCache>(new MemCache(CacheSize));
 

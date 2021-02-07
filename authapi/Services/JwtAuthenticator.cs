@@ -5,6 +5,7 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 using authapi.Models;
+using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
 
 namespace authapi.Services
@@ -12,13 +13,15 @@ namespace authapi.Services
     class JwtAuthenticator : IJwtAuthentication
     {
         private readonly string _token;
+        private readonly ILogger<JwtAuthenticator> _logger;
         private readonly IRepository _repository;
         private readonly IMemCache _cache;
 
-        public JwtAuthenticator(IRepository repository, IMemCache cache, string token)
+        public JwtAuthenticator(ILogger<JwtAuthenticator> logger, IRepository repository, IMemCache cache, string token)
         {
-            this._token = token;
+            this._logger = logger;
             this._repository = repository;
+            this._token = token;
             this._cache = cache;
         }
         public async Task<Jwt> GetJwtToken(User userFromUI)
@@ -68,20 +71,29 @@ namespace authapi.Services
             var tokenHandler = new JwtSecurityTokenHandler();
             var key = Encoding.ASCII.GetBytes(_token);
 
-            SecurityToken validatedToken;
+            SecurityToken validatedToken = null;
+            ClaimsPrincipal principal = null;
+            JwtSecurityToken securityToken = null;
 
             // validate the token context
-            var principal = tokenHandler.ValidateToken(refreshToken.Token,
-                new TokenValidationParameters
-                {
-                    ValidateIssuerSigningKey = true,
-                    IssuerSigningKey = new SymmetricSecurityKey(key),
-                    ValidateIssuer = false,
-                    ValidateAudience = false,
-                    ValidateLifetime = true //here we are saying that we care about the token's expiration date
-                }, out validatedToken);
+            try
+            {
+                principal = tokenHandler.ValidateToken(refreshToken.Token,
+                    new TokenValidationParameters
+                    {
+                        ValidateIssuerSigningKey = true,
+                        IssuerSigningKey = new SymmetricSecurityKey(key),
+                        ValidateIssuer = false,
+                        ValidateAudience = false,
+                        ValidateLifetime = true //here we are saying that we care about the token's expiration date
+                    }, out validatedToken);
 
-            var securityToken = validatedToken as JwtSecurityToken;
+                securityToken = validatedToken as JwtSecurityToken;
+            }
+            catch (SecurityTokenException ex)
+            {
+                _logger.LogInformation(ex.Message, ex.InnerException?.Message);
+            }
 
             if (securityToken == null || !securityToken.Header.Alg.Equals(SecurityAlgorithms.HmacSha512, StringComparison.InvariantCultureIgnoreCase))
                 return null;

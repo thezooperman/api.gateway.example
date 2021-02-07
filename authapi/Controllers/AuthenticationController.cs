@@ -28,7 +28,7 @@ namespace authapi.Controllers
         {
             if (await _repository.GetUser(userCred.UserName) != null)
             {
-                _logger.LogDebug($"Cannot add existing user.");
+                _logger.LogWarning($"Cannot add existing user.");
                 return StatusCode(StatusCodes.Status304NotModified);
             }
             await _repository.AddUser(userCred.UserName, userCred.Password);
@@ -44,10 +44,10 @@ namespace authapi.Controllers
             var token = await _jwtAuthentication.GetJwtToken(userCred);
             if (token != null)
             {
-                _logger.LogDebug($"User: {userCred.UserName} is authenticated.");
+                _logger.LogInformation($"User: {userCred.UserName} is authenticated.");
                 return StatusCode(StatusCodes.Status302Found, token);
             }
-            _logger.LogDebug($"User: {userCred.UserName} is not authenticated.");
+            _logger.LogInformation($"User: {userCred.UserName} is not authenticated.");
 
             return Unauthorized("Incorrect User Id or Password");
         }
@@ -59,7 +59,7 @@ namespace authapi.Controllers
             if (token == null)
                 return Unauthorized("Token not present or already expired. Please re-authenticate.");
 
-            _logger.LogDebug($"Token: {refreshToken.Token} refreshed");
+            _logger.LogInformation($"Token: {refreshToken.Token} refreshed");
             return StatusCode(StatusCodes.Status202Accepted, token);
         }
     }

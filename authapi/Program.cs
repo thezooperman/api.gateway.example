@@ -17,6 +17,6 @@ namespace authapi
                 {
                     webBuilder.UseStartup<Startup>();
                 })
-                .ConfigureLogging(options => options.AddDebug());
+                .ConfigureLogging(options => options.AddConsole());
     }
 }
