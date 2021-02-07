@@ -132,9 +132,11 @@ namespace authapi.Services
                 )
             };
 
-            jwt = new Jwt();
-            jwt.Token = tokenHandler.WriteToken(tokenHandler.CreateJwtSecurityToken(tokenDescriptor));
-            jwt.ExpiresAt = tokenDescriptor.Expires.Value;
+            jwt = new Jwt
+            {
+                Token = tokenHandler.WriteToken(tokenHandler.CreateJwtSecurityToken(tokenDescriptor)),
+                ExpiresAt = tokenDescriptor.Expires.Value
+            };
 
             _cache.Put(uName, jwt);
 
