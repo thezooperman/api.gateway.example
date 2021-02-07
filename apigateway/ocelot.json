@@ -1,0 +1,29 @@
+{
+	"ReRoutes": [
+		{
+			"DownstreamPathTemplate": "/api/{catchAll}",
+			"DowstreamScheme": "http",
+			"DownstreamhostAndPorts": [
+				{
+					"Host": "localhost",
+					"Port": 7001
+				}
+			],
+			"UpstreamPathTemplate": "/catalog-api/{catchAll}"
+		},
+		{
+			"DownstreamPathTemplate": "/api/{catchAll}",
+			"DowstreamScheme": "http",
+			"DownstreamhostAndPorts": [
+				{
+					"Host": "localhost",
+					"Port": 7002
+				}
+			],
+			"UpstreamPathTemplate": "/orders-api/{catchAll}"
+		}
+	],
+	"GlovalConfiguration": {
+		"BaseUrl": "http://localhost:7000"
+	}
+}
